@@ -14,3 +14,9 @@ If you use it or part of it for your work, please cite
 Wei, Guopeng, Paul Bogdan, and Radu Marculescu. "Efficient Modeling and
 Simulation of Bacteria-Based Nanonetworks with BNSim." Selected Areas in
 Communications, IEEE Journal on 31.12 (2013): 868-878.
+
+You can build the program easily by importing the source files into 
+Xcode or Eclipse or any other IDE you like.
+
+The simulator is fully extensible, you can add regulatory networks in the 
+library, and different cell types in the zoo. 
