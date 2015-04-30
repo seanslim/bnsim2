@@ -25,6 +25,7 @@
 #include "../exporters/regularExporters.h"
 #include "../agents/headers/ChemotacticBacteria.h"
 #include <ctime>
+#include <cstring>
 
 using namespace std;
 using namespace BNSim;
@@ -36,17 +37,15 @@ int main(int argn, char **argv) {
 	time_t start, end;
 	time(&start);
 
-	cout << "BNSim 2.0 -- Chamotaxis Example"
-			<< endl;
+	cout << "BNSim 2.0 -- Chamotaxis Example" << endl;
 
 	//---------------------------------------Setup Critical Parameters-----------------------------------
 
-	CONFIG::workdir = "/Users/guopeng/data/";
+	CONFIG::workdir = "/home/daniel/test/";
 
-	CONFIG::worldSizeX = 10000; // 0.5 cm
+	CONFIG::worldSizeX = 1000; // 0.5 cm
 	CONFIG::worldSizeY = 500;
-	CONFIG::worldSizeZ = 10000;
-	CONFIG::boundaryLayerThickness = 100;
+	CONFIG::worldSizeZ = 150;
 
 	CONFIG::gridNumberX = 10;
 	CONFIG::gridNumberY = 250;
@@ -54,17 +53,16 @@ int main(int argn, char **argv) {
 
 	CONFIG::numberMoleculeSpecies = 1;
 	CONFIG::threadNumber = 8;
-	CONFIG::timestep = 0.4;  // 0.4 seconds
-	CONFIG::simLength = 60*60;  // 60 mins
+	CONFIG::timestep = 0.1;  // 0.4 seconds
+	CONFIG::simLength = 10 * 60;  // 60 mins
 
-    	for (int i = 1; i < argn; i++) {
-    		if (strcmp(argv[i], "-dir") == 0) {
-    			CONFIG::workdir = argv[++i];
-    			continue;
-    		}
-    	}
+	for (int i = 1; i < argn; i++) {
+		if (strcmp(argv[i], "-dir") == 0) {
+			CONFIG::workdir = argv[++i];
+			continue;
+		}
+	}
 
-	CONFIG::boundaryLayerThickness = 100; // this will update the height of layers automatically
 
 	//---------------------------------------Build the Universe-------------------------------------------
 
@@ -75,18 +73,21 @@ int main(int argn, char **argv) {
 
 	//---------------------------Create a stable one dimensional chemoattractant gradient -----------------
 
-    double chemotaxis_gradient = 1e-4;   CONFIG::diffusion = false; // constant linear gradient
-    
+	double chemotaxis_gradient = 1e-4;
+	CONFIG::diffusion = false; // constant linear gradient
+
 	for (unsigned int x = 0; x != CONFIG::gridNumberX; ++x)
 		for (unsigned int y = 0; y != CONFIG::gridNumberY; ++y)
 			for (unsigned int z = 0; z != CONFIG::gridNumberZ; ++z) {
 				Grid* thisGrid = CONFIG::universe->getGrid(x, y, z);
-                thisGrid->setConc(0, (CONFIG::worldSizeY- y)*chemotaxis_gradient*CONFIG::gridSizeY);
+				thisGrid->setConc(0,
+						(CONFIG::worldSizeY - y) * chemotaxis_gradient
+								* CONFIG::gridSizeY);
 			}
 
 	//------------------------------------------Add Some Bacteria-----------------------------------------------
 
-	std::size_t bacNum = 2000;
+	std::size_t bacNum = 10000;
 	unsigned int i = 0;
 	while (i++ < bacNum) {
 		myVector3d Position;
@@ -97,7 +98,7 @@ int main(int argn, char **argv) {
 		Position.pos.z = 0.05 * CONFIG::worldSizeZ
 				+ 0.1 * CONFIG::worldSizeZ * ((double) rand() / (RAND_MAX));
 		Agent* newBac = new ChemotacticBacteria(Position,
-				1.5 + 0.49 * ((double) rand() / (RAND_MAX)), 1.2, 30);
+				1.5 + 0.49 * ((double) rand() / (RAND_MAX)), 1.2, 15);   // velocity changed to 15 um/s
 		universe.addAgent(newBac);
 	}
 
@@ -111,7 +112,7 @@ int main(int argn, char **argv) {
 				<< " seconds Agents number: " << universe.getTotalAgentNumber()
 				<< endl;
 
-		if (((int) CONFIG::time) % 20 == 0
+		if (((int) CONFIG::time) % 1 == 0
 				&& (CONFIG::time - (int) CONFIG::time) < CONFIG::timestep) {
 			regularExporters::dump_Agent();
 		}

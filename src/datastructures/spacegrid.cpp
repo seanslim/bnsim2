@@ -33,6 +33,8 @@ Grid::Grid(const int gridIndex):_gridIndex(gridIndex)
 
 	_agents = new BNSimVector<Agent*>();
 	_type = bulk;   // all grids initialized to bulk type
+
+	volume = CONFIG::gridSizeZ*CONFIG::gridSizeY*CONFIG::gridSizeZ;
 }
 
 
@@ -52,7 +54,19 @@ void Grid::updateParticles()
 }
 
 void Grid::setConc(const unsigned int moleculeSpeciesIndex, const double conc){
+	mutexLock lock(locker);
      _moleculeSpeciesConc[moleculeSpeciesIndex] = conc>0?conc:0;
+}
+
+void Grid::deltaChemical(const unsigned int moleculeSpeciesIndex, const double mass) {
+
+	mutexLock lock(locker);
+	double orgmass = _moleculeSpeciesConc[moleculeSpeciesIndex]*volume;
+
+	_moleculeSpeciesConc[moleculeSpeciesIndex] = (orgmass+mass)/volume;
+
+	if(_moleculeSpeciesConc[moleculeSpeciesIndex]<0)
+        _moleculeSpeciesConc[moleculeSpeciesIndex] = 0;
 }
 
 void Grid::consumeChemical(const unsigned int moleculeSpeciesIndex, const double conc) {

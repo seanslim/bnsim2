@@ -44,6 +44,7 @@ public:
 	const std::size_t getAgentNumber() { return _agents->getCount(); }
 	void addAgent(Agent* p) ;
 	void deleteAgent(Agent* p);
+	void deltaChemical(const unsigned int moleculeSpeciesIndex, const double mass);
 	layerType getLayerType() {return _type;}
 	void setLayerType(layerType type) {_type = type; }
 	BNSimVector<Agent*> *_agents;
@@ -52,6 +53,7 @@ private:
 	double *_moleculeSpeciesConc;
 	std::mutex locker;
 	layerType _type;
+	double volume;
 };
 
 }

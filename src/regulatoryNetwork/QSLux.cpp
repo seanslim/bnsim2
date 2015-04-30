@@ -139,7 +139,8 @@ void QSLux::update() {
 	//		//    Sim::univ->BacNetwork->addNode(this->host->getID());
 	//		activated = false;
 	//	}
-
+	double agentVolume = getHost()->getTotalRadius()
+			* getHost()->getTotalRadius() * getHost()->getTotalRadius();
 
 	int AIIndex = -1;
 	AIIndex = CONFIG::universe->getMoleculeInfo("AI")==NULL?-1:CONFIG::universe->getMoleculeInfo("AI")->getIndex();
@@ -149,29 +150,10 @@ void QSLux::update() {
 
 	if(AIIndex!=-1) {
 		ex = myGrid->getConc(AIIndex);
-		delta = (A1 - ex)*D*timestep;
-		A1 -= delta;
-		myGrid->setConc(AIIndex,ex+ delta);   //mM
-	}
-
-	if(QSI1!=-1) {
-		ex = myGrid->getConc(QSI1);
-		delta = (qsi1 - ex)*D*timestep;
-		qsi1 -= delta;
-		myGrid->setConc(QSI1,ex+ delta);   //mM
-	}
-	if(QSI2!=-1) {
-		ex = myGrid->getConc(QSI2);
-		delta = (qsi2 - ex)*D*timestep;
-		qsi2 -= delta;
-		myGrid->setConc(QSI2,ex+ delta);   //mM
-	}
-
-	if(QSI3!=-1) {
-		ex = myGrid->getConc(QSI3);
-		delta = (qsi3 - ex)*D*timestep;
-		qsi3 -= delta;
-		myGrid->setConc(QSI3,ex+ delta);   //mM
+		double deltaCon = (A1 - ex) * D * timestep;
+		double deltaMass = deltaCon*agentVolume;
+		A1 = (A1 * agentVolume-deltaMass)/agentVolume;
+		myGrid->deltaChemical(AIIndex, deltaMass);
 	}
 }
 

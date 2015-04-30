@@ -47,14 +47,14 @@ Agent::~Agent() {
 }
 
 RegulatoryNet* Agent::getRegulatoryNet(const std::string& name) {
-    for (std::vector<RegulatoryNet *>::iterator itr = _nets.begin();
-         itr != _nets.end(); itr++) {
-        if((*itr)->getName()==name)
-            return(*itr);
-    }
-    return NULL;
+	for (std::vector<RegulatoryNet *>::iterator itr = _nets.begin();
+			itr != _nets.end(); itr++) {
+		if ((*itr)->getName() == name)
+			return (*itr);
+	}
+	return NULL;
 }
-    
+
 void Agent::update() {
 	// update regulatory networks
 	for (std::vector<RegulatoryNet *>::iterator itr = _nets.begin();
@@ -64,11 +64,9 @@ void Agent::update() {
 	shove();
 	updateVolume();
 	updateRadius();
-	updateGridPos();
 }
 
 void Agent::pos_update() {
-	_absPosition.add(_deltaMovement);
 	_absPosition.add(_deltaMovement);
 
 	// check boundaries
@@ -167,52 +165,58 @@ void Agent::registerGridPos() {
 
 void Agent::updateGridPos() {
 
-	intVector3d newPos;
+	try {
+		intVector3d newPos;
 
-	double x = (_absPosition.pos.x + _deltaMovement.pos.x)
-			/ (double) (CONFIG::gridSizeX);
-	double y = (_absPosition.pos.y + _deltaMovement.pos.y)
-			/ (double) (CONFIG::gridSizeY);
-	double z = (_absPosition.pos.z + _deltaMovement.pos.z)
-			/ (double) (CONFIG::gridSizeZ);
+		double x = (_absPosition.pos.x + _deltaMovement.pos.x)
+				/ (double) (CONFIG::gridSizeX);
+		double y = (_absPosition.pos.y + _deltaMovement.pos.y)
+				/ (double) (CONFIG::gridSizeY);
+		double z = (_absPosition.pos.z + _deltaMovement.pos.z)
+				/ (double) (CONFIG::gridSizeZ);
 
-	double remainderx = (int) (x * 100) % 100;
-	double remaindery = (int) (y * 100) % 100;
-	double remainderz = (int) (z * 100) % 100;
+		double remainderx = (int) (x * 100) % 100;
+		double remaindery = (int) (y * 100) % 100;
+		double remainderz = (int) (z * 100) % 100;
 
-	if (remainderx >= 50)
-		newPos.x = floor(x) + 1;
-	else
-		newPos.x = floor(x);
-	if (remaindery >= 50)
-		newPos.y = floor(y) + 1;
-	else
-		newPos.y = floor(y);
-	if (remainderz >= 50)
-		newPos.z = floor(z) + 1;
-	else
-		newPos.z = floor(z);
+		if (remainderx >= 50)
+			newPos.x = floor(x) + 1;
+		else
+			newPos.x = floor(x);
+		if (remaindery >= 50)
+			newPos.y = floor(y) + 1;
+		else
+			newPos.y = floor(y);
+		if (remainderz >= 50)
+			newPos.z = floor(z) + 1;
+		else
+			newPos.z = floor(z);
 
-	if (newPos.x >= CONFIG::gridNumberX)
-		newPos.x = CONFIG::gridNumberX - 1;
-	if (newPos.y >= CONFIG::gridNumberY)
-		newPos.y = CONFIG::gridNumberY - 1;
-	if (newPos.z >= CONFIG::gridNumberZ)
-		newPos.z = CONFIG::gridNumberZ - 1;
+		if (newPos.x >= CONFIG::gridNumberX)
+			newPos.x = CONFIG::gridNumberX - 1;
+		if (newPos.y >= CONFIG::gridNumberY)
+			newPos.y = CONFIG::gridNumberY - 1;
+		if (newPos.z >= CONFIG::gridNumberZ)
+			newPos.z = CONFIG::gridNumberZ - 1;
 
-	if (!(newPos.x == _gridPosition.x && newPos.y == _gridPosition.y
-			&& newPos.z == _gridPosition.z)) {
-		CONFIG::universe->getGrid(_gridPosition.x, _gridPosition.y,
-				_gridPosition.z)->deleteAgent(this);
+		if (!(newPos.x == _gridPosition.x && newPos.y == _gridPosition.y
+				&& newPos.z == _gridPosition.z)) {
+			CONFIG::universe->getGrid(_gridPosition.x, _gridPosition.y,
+					_gridPosition.z)->deleteAgent(this);
 
-		myGrid = CONFIG::universe->getGrid(newPos.x, newPos.y, newPos.z);
+			myGrid = CONFIG::universe->getGrid(newPos.x, newPos.y, newPos.z);
+			myGrid->addAgent(this);
 
-		myGrid->addAgent(this);
+			//std::cout<<"moving to a new grid"<<std::endl;
+		}
+		_gridPosition = newPos;
+	} catch (...) {
+		std::cout<<"something wrong when updating grid positions"<<std::endl;
 	}
-	_gridPosition = newPos;
 }
 
 void Agent::shove() {
+
 	// Get all the grids
 	BNSimVector<Agent*> * gridsArray[7];
 	gridsArray[0] = myGrid->_agents;
@@ -260,28 +264,28 @@ void Agent::shove() {
 
 		for (unsigned int j = 0; j < (*gridsArray[i]).getSize(); ++j) {
 			Agent * agentB = (*gridsArray[i])[j];
-            try {
-                // make sure it's not me
-                if (agentB == this || agentB == NULL || agentB==nullptr)
-                    continue;
-                
-                double radiusSum = agentB->getTotalRadius() + _total_radius;
-                
-                double distance = getDistance(*agentB);
-                
-                // packed
-                if (distance < radiusSum) {
-                    myVector3d delta(_absPosition);
-                    delta.sub(agentB->getabsPosition());
-                    delta.normalize();
-                    delta.scale(0.5 * (radiusSum - distance));
-                    
-                    _deltaMovement.add(delta);
-                }
-            } catch (...) {
-                ;
-            }
-			
+			try {
+				// make sure it's not me
+				if (agentB == this || agentB == NULL || agentB == nullptr)
+					continue;
+
+				double radiusSum = agentB->getTotalRadius() + _total_radius;
+
+				double distance = getDistance(*agentB);
+
+				// packed
+				if (distance < radiusSum) {
+					myVector3d delta(_absPosition);
+					delta.sub(agentB->getabsPosition());
+					delta.normalize();
+					delta.scale(0.5 * (radiusSum - distance));
+
+					_deltaMovement.add(delta);
+				}
+			} catch (...) {
+				;
+			}
+
 		}
 	}
 }

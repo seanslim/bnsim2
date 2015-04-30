@@ -34,7 +34,7 @@ std::size_t CONFIG::threadNumber = 1;
 std::string CONFIG::workdir = "";
 Universe* CONFIG::universe = NULL;
 unsigned int CONFIG::boundaryLayerThickness = 0;
-    bool CONFIG::diffusion = true;
+bool CONFIG::diffusion = true;
 
 Universe::Universe() {
 
@@ -59,8 +59,8 @@ Universe::Universe() {
 	evn_thr_data = new thread_data_t[CONFIG::threadNumber];
 
 	CONFIG::universe = this;
-    IDcounts = 0;
-    _Agents.setCapacity(10000000);
+	IDcounts = 0;
+	_Agents.setCapacity(10000000);
 }
 
 Universe::~Universe() {
@@ -163,10 +163,10 @@ void * environment_thread(void *arg) {
 					zDown = (k == 0 ? -1 : k - 1);
 
 					Grid* thisGrid = CONFIG::universe->getGrid(i, j, k);
-     
-                    if(thisGrid->getLayerType()==bulk)
-                        continue;
-                    
+
+					if (thisGrid->getLayerType() == bulk)
+						continue;
+
 					Grid* neighbor = NULL;
 
 					if (xEast != -1) {
@@ -188,22 +188,25 @@ void * environment_thread(void *arg) {
 						/* Calculate the Sim::cubesList of chemical leaving the grid in this direction */
 						movingQuant = -kX
 								* (neighbor->getConc(p) - thisGrid->getConc(p));
-                        
-                        /* Adjust the amount to avoid numerical instability*/
-                        double minQuant = 0;
-                        
-                        if(movingQuant>0)
-                            minQuant = movingQuant>thisGrid->getConc(p)?thisGrid->getConc(p):movingQuant;
-                        else
-                            minQuant = movingQuant>neighbor->getConc(p)?neighbor->getConc(p):movingQuant;
-                        
-                      
+
+						/* Adjust the amount to avoid numerical instability*/
+						double minQuant = 0;
+
+						if (movingQuant > 0)
+							minQuant =
+									movingQuant > thisGrid->getConc(p) ?
+											thisGrid->getConc(p) : movingQuant;
+						else
+							minQuant =
+									movingQuant > neighbor->getConc(p) ?
+											neighbor->getConc(p) : movingQuant;
+
 						if (neighbor->getLayerType() != bulk) {
 							temp = neighbor->getConc(p) + minQuant;
 							/* Add that Sim::cubesList to the grid above */
 							neighbor->setConc(p, (temp > 0 ? temp : 0));
 						}
-                        
+
 						/* Remove it from this grid */
 						temp = thisGrid->getConc(p) - minQuant;
 						thisGrid->setConc(p, (temp > 0 ? temp : 0));
@@ -227,13 +230,17 @@ void * environment_thread(void *arg) {
 						movingQuant = -kX
 								* (neighbor->getConc(p) - thisGrid->getConc(p));
 
-                        double minQuant = 0;
-                        
-                        if(movingQuant>0)
-                            minQuant = movingQuant>thisGrid->getConc(p)?thisGrid->getConc(p):movingQuant;
-                        else
-                            minQuant = movingQuant>neighbor->getConc(p)?neighbor->getConc(p):movingQuant;
-                        
+						double minQuant = 0;
+
+						if (movingQuant > 0)
+							minQuant =
+									movingQuant > thisGrid->getConc(p) ?
+											thisGrid->getConc(p) : movingQuant;
+						else
+							minQuant =
+									movingQuant > neighbor->getConc(p) ?
+											neighbor->getConc(p) : movingQuant;
+
 						if (neighbor->getLayerType() != bulk) {
 							temp = neighbor->getConc(p) + minQuant;
 							neighbor->setConc(p, (temp > 0 ? temp : 0));
@@ -259,15 +266,19 @@ void * environment_thread(void *arg) {
 
 						movingQuant = -kY
 								* (neighbor->getConc(p) - thisGrid->getConc(p));
-                        
-                        double minQuant = 0;
-                        
-                        if(movingQuant>0)
-                            minQuant = movingQuant>thisGrid->getConc(p)?thisGrid->getConc(p):movingQuant;
-                        else
-                            minQuant = movingQuant>neighbor->getConc(p)?neighbor->getConc(p):movingQuant;
-                    
-                        if (neighbor->getLayerType() != bulk) {
+
+						double minQuant = 0;
+
+						if (movingQuant > 0)
+							minQuant =
+									movingQuant > thisGrid->getConc(p) ?
+											thisGrid->getConc(p) : movingQuant;
+						else
+							minQuant =
+									movingQuant > neighbor->getConc(p) ?
+											neighbor->getConc(p) : movingQuant;
+
+						if (neighbor->getLayerType() != bulk) {
 							temp = neighbor->getConc(p) + minQuant;
 							neighbor->setConc(p, (temp > 0 ? temp : 0));
 						}
@@ -294,13 +305,17 @@ void * environment_thread(void *arg) {
 						movingQuant = -kY
 								* (neighbor->getConc(p) - thisGrid->getConc(p));
 
-                        double minQuant = 0;
-                        
-                        if(movingQuant>0)
-                            minQuant = movingQuant>thisGrid->getConc(p)?thisGrid->getConc(p):movingQuant;
-                        else
-                            minQuant = movingQuant>neighbor->getConc(p)?neighbor->getConc(p):movingQuant;
-                    
+						double minQuant = 0;
+
+						if (movingQuant > 0)
+							minQuant =
+									movingQuant > thisGrid->getConc(p) ?
+											thisGrid->getConc(p) : movingQuant;
+						else
+							minQuant =
+									movingQuant > neighbor->getConc(p) ?
+											neighbor->getConc(p) : movingQuant;
+
 						if (neighbor->getLayerType() != bulk) {
 							temp = neighbor->getConc(p) + minQuant;
 							neighbor->setConc(p, (temp > 0 ? temp : 0));
@@ -328,13 +343,17 @@ void * environment_thread(void *arg) {
 						movingQuant = -kZ
 								* (neighbor->getConc(p) - thisGrid->getConc(p));
 
-                        double minQuant = 0;
-                        
-                        if(movingQuant>0)
-                            minQuant = movingQuant>thisGrid->getConc(p)?thisGrid->getConc(p):movingQuant;
-                        else
-                            minQuant = movingQuant>neighbor->getConc(p)?neighbor->getConc(p):movingQuant;
-                    
+						double minQuant = 0;
+
+						if (movingQuant > 0)
+							minQuant =
+									movingQuant > thisGrid->getConc(p) ?
+											thisGrid->getConc(p) : movingQuant;
+						else
+							minQuant =
+									movingQuant > neighbor->getConc(p) ?
+											neighbor->getConc(p) : movingQuant;
+
 						if (neighbor->getLayerType() != bulk) {
 							temp = neighbor->getConc(p) + minQuant;
 							neighbor->setConc(p, (temp > 0 ? temp : 0));
@@ -361,13 +380,17 @@ void * environment_thread(void *arg) {
 						movingQuant = -kZ
 								* (neighbor->getConc(p) - thisGrid->getConc(p));
 
-                        double minQuant = 0;
-                        
-                        if(movingQuant>0)
-                            minQuant = movingQuant>thisGrid->getConc(p)?thisGrid->getConc(p):movingQuant;
-                        else
-                            minQuant = movingQuant>neighbor->getConc(p)?neighbor->getConc(p):movingQuant;
-                        
+						double minQuant = 0;
+
+						if (movingQuant > 0)
+							minQuant =
+									movingQuant > thisGrid->getConc(p) ?
+											thisGrid->getConc(p) : movingQuant;
+						else
+							minQuant =
+									movingQuant > neighbor->getConc(p) ?
+											neighbor->getConc(p) : movingQuant;
+
 						if (neighbor->getLayerType() != bulk) {
 							temp = neighbor->getConc(p) + minQuant;
 							neighbor->setConc(p, (temp > 0 ? temp : 0));
@@ -383,7 +406,7 @@ void * environment_thread(void *arg) {
 							* thisGrid->getConc(p)) * CONFIG::timestep;
 					thisGrid->setConc(p, newValue > 0 ? newValue : 0);
 				}
-        
+
 	}
 
 	pthread_exit(NULL);
@@ -406,10 +429,10 @@ void * agent_thread(void *arg) {
 	}
 
 	for (unsigned int i = data->start; i != data->end; ++i) {
-        unsigned int id = order[i - data->start];
-        Agent * age = CONFIG::universe->getAgent(id);
-		if(age!=NULL)
-            age->update();
+		unsigned int id = order[i - data->start];
+		Agent * age = CONFIG::universe->getAgent(id);
+		if (age != NULL)
+			age->update();
 	}
 	pthread_exit(NULL);
 }
@@ -420,49 +443,9 @@ void * post_agent_thread(void *arg) {
 	thread_data_t *data = (thread_data_t *) arg;
 
 	for (unsigned int i = data->start; i != data->end; ++i) {
-        if(CONFIG::universe->getAgent(i)!=NULL)
-            CONFIG::universe->getAgent(i)->pos_update();
+		if (CONFIG::universe->getAgent(i) != NULL)
+			CONFIG::universe->getAgent(i)->pos_update();
 	}
-
-	pthread_exit(NULL);
-}
-
-// Update diffusion layers properties in the grids
-void * adjust_grid_thread(void *arg) {
-	thread_data_t *data = (thread_data_t *) arg;
-	unsigned int startIndex = data->start;
-	unsigned int endIndex = data->end;
-
-	std::size_t n_boundaryGrid = CONFIG::boundaryLayerThickness	/ CONFIG::gridSizeZ;
-
-	for (unsigned int x = startIndex; x != endIndex; ++x)
-		for (unsigned int y = 0; y != CONFIG::gridNumberY; ++y) {
-
-			// initialize everything to bulk
-			for (unsigned int z = 0; z != CONFIG::gridNumberZ; ++z)
-				CONFIG::universe->getGrid(x, y, z)->setLayerType(bulk);
-
-            // set the boundary layers
-            for (unsigned int z = 0; z != n_boundaryGrid; ++z)
-                CONFIG::universe->getGrid(x, y, z)->setLayerType(boundary);
-            
-			// assign biofilm and adjust boundary layers
-			for (unsigned int z = 0; z != CONFIG::gridNumberZ-1; ++z) {
-
-				Grid* thisGrid = CONFIG::universe->getGrid(x, y, z);
-
-				if (thisGrid->getAgentNumber() != 0) {
-					thisGrid->setLayerType(biofilm);
-
-					for (unsigned int zUp = z + 1;
-							zUp != z + n_boundaryGrid + 1 && zUp<CONFIG::gridNumberZ ; ++zUp) {
-						if (zUp != CONFIG::gridNumberZ )
-							CONFIG::universe->getGrid(x, y, zUp)->setLayerType(
-									boundary);
-					}
-				}
-			}
-		}
 
 	pthread_exit(NULL);
 }
@@ -534,18 +517,6 @@ void Universe::update_environment_p() {
 	for (i = 0; i != CONFIG::threadNumber; ++i) {
 		pthread_join(thr[i], NULL);
 	}
-
-	for (unsigned int i = 0; i != CONFIG::threadNumber; ++i) {
-		if ((rc = pthread_create(&thr[i], NULL, adjust_grid_thread,
-				&evn_thr_data[order[i]]))) {
-			return;
-		}
-	}
-
-	/* block until all threads complete */
-	for (i = 0; i != CONFIG::threadNumber; ++i) {
-		pthread_join(thr[i], NULL);
-	}
 }
 
 void Universe::prepare_multithreading() {
@@ -576,10 +547,10 @@ void Universe::prepare_multithreading() {
 void Universe::evolute() {
 	prepare_multithreading();
 	update_agent_parallel();
-    
-    if(CONFIG::diffusion)
-	update_environment_p();
-  
+
+	if (CONFIG::diffusion)
+		update_environment_p();
+
 	CONFIG::time += CONFIG::timestep;
 }
 
@@ -608,8 +579,6 @@ const MoleculeInfo* Universe::getMoleculeInfo(const unsigned int index) {
 	} else
 		return NULL;
 }
-
-
 
 Grid* Universe::getEastGrid(unsigned int x, unsigned int y, unsigned int z) {
 	int xEast = (x == CONFIG::gridNumberX - 1 ? -1 : x + 1);
