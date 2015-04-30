@@ -62,8 +62,8 @@ void Agent::update() {
 		(*itr)->update();
 
 	shove();
-	//updateVolume();
-	//updateRadius();
+	updateVolume();
+	updateRadius();
 }
 
 void Agent::pos_update() {
