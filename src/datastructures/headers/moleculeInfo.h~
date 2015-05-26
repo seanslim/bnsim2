@@ -47,7 +47,7 @@ public:
 	double getDecayRate(layerType type) const {
 		if (type == biofilm)
 			return _decay_biofilmLayer;
-		else if (type == boundary)
+		else
 			return _decay_boundaryLayer;
 	}
 private:
