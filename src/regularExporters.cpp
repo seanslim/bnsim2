@@ -104,6 +104,18 @@ void regularExporters::dump_Agent() {
 	agents.close();
 }
 
+void regularExporters::export_agent_position(ofstream& output_file) {
+	
+	for (int i = 0; i < CONFIG::universe->getTotalAgentNumber(); i++) {
+		myVector3d abs_pos = CONFIG::universe->getAgent(i)->getabsPosition();
+		
+		output_file << abs_pos.pos.x << " " << abs_pos.pos.y << " " 
+					<< abs_pos.pos.z << " ";
+	}
+	
+	output_file << endl;
+}
+
 void regularExporters::dump_CUDA_Biofilm() {
 	char file_name[100];
 	int clk = (int) (CONFIG::time);

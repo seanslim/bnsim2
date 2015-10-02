@@ -54,7 +54,7 @@ int main(int argn, char **argv) {
 	CONFIG::numberMoleculeSpecies = 1;
 	CONFIG::threadNumber = 8;
 	CONFIG::timestep = 0.1;  // 0.4 seconds
-	CONFIG::simLength = 10 * 60;  // 60 mins
+	CONFIG::simLength = 10;  // 60 mins
 
 	for (int i = 1; i < argn; i++) {
 		if (strcmp(argv[i], "-dir") == 0) {
@@ -87,7 +87,7 @@ int main(int argn, char **argv) {
 
 	//------------------------------------------Add Some Bacteria-----------------------------------------------
 
-	std::size_t bacNum = 10000;
+	std::size_t bacNum = 10;
 	unsigned int i = 0;
 	while (i++ < bacNum) {
 		myVector3d Position;
@@ -103,7 +103,7 @@ int main(int argn, char **argv) {
 	}
 
 	//-----------------------------------------Main Simulation Loop----------------------------------------------
-	regularExporters::dump_Agent();
+	ofstream dump_file("bacteria_timeseries.txt", ofstream::trunc);
 	regularExporters::dump_Con(0);
 
 	while (CONFIG::time < CONFIG::simLength) {
@@ -114,10 +114,12 @@ int main(int argn, char **argv) {
 
 		if (((int) CONFIG::time) % 1 == 0
 				&& (CONFIG::time - (int) CONFIG::time) < CONFIG::timestep) {
-			regularExporters::dump_Agent();
+			regularExporters::export_agent_position(dump_file);
 		}
 	}
 
+	dump_file.close();
+	
 	time(&end);
 	double dif = difftime(end, start);
 

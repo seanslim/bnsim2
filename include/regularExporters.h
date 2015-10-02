@@ -35,6 +35,7 @@ public:
 	static void dump_CUDA_Biofilm();
 	static void dump_QS_Status(std::ofstream& QSStatus);
 	static void dump_Metabolism_Status(std::ofstream& MetaStatus);
+	static void export_agent_position(std::ofstream& output_file);
 };
 
 } /* namespace BNSim */
