@@ -30,7 +30,7 @@ namespace BNSim {
 
 class regularExporters {
 public:
-	static void dump_Con(unsigned int chemicalIndex);
+	static void dump_Con(unsigned int chemicalIndex, const char file_name[]);
 	static void dump_Agent();
 	static void dump_CUDA_Biofilm();
 	static void dump_QS_Status(std::ofstream& QSStatus);

@@ -30,6 +30,21 @@
 using namespace std;
 using namespace BNSim;
 
+struct Parameters {
+    /* world size in micrometers */
+    double sizex    = 1000; 
+    double sizey    = 1000;
+    double sizez    = 100;
+    
+    /* world resolution */
+    double grid     = 10;
+    
+    double species  = 1;
+    double threads  = 4;
+    double timestep = 0.1;
+    double simtime  = 3600;
+};
+
 // Quorum sensing example
 
 int main(int argn, char **argv) {
@@ -41,7 +56,7 @@ int main(int argn, char **argv) {
 
 	//---------------------------------------Setup Critical Parameters-----------------------------------
 
-	CONFIG::workdir = "/home/daniel/test/";
+	CONFIG::workdir = "./";
 
 	CONFIG::worldSizeX = 1000; // 0.5 cm
 	CONFIG::worldSizeY = 500;
@@ -103,8 +118,8 @@ int main(int argn, char **argv) {
 	}
 
 	//-----------------------------------------Main Simulation Loop----------------------------------------------
-	ofstream dump_file("bacteria_timeseries.txt", ofstream::trunc);
-	regularExporters::dump_Con(0);
+	ofstream dump_file("bacteria.txt", ofstream::trunc);
+	regularExporters::dump_Con(0, "concentration.txt");
 
 	while (CONFIG::time < CONFIG::simLength) {
 		universe.evolute();

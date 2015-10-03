@@ -25,11 +25,8 @@ using namespace std;
 
 namespace BNSim {
 
-void regularExporters::dump_Con(unsigned int chemicalIndex) {
-	char file_name[100];
+void regularExporters::dump_Con(unsigned int chemicalIndex, const char file_name[]) {
 	int clk = (int) (CONFIG::time);
-	string path(CONFIG::workdir + "/chemicalCon2D_%d_time_%d.txt");
-	sprintf(file_name, path.c_str(), chemicalIndex, clk);
 	ofstream gradient(file_name);
 
 	for (unsigned int i = 0; i != CONFIG::gridNumberX; ++i) {
