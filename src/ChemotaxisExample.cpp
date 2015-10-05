@@ -94,10 +94,10 @@ int main(int argn, char **argv) {
 				    /* No food */
 				    thisGrid->setConc(0, 0.0);
 				    				
-				} else if (y <= 0.7 * params.gridy) {
+				} else if (y <= 0.6 * params.gridy) {
 				    /* High gradient 0 to 1 */
 				    thisGrid->setConc(0, (double(y) / params.gridy - 0.3) *
-				                         2.5 / params.gridz);
+				                         3.3 / params.gridz);
 				    
 				} else {
 				    /* Food without gradient */
@@ -112,7 +112,7 @@ int main(int argn, char **argv) {
         double x, y, z, bias, radius;
         
         radius  =  1.5 + 0.49 * double(rand()) / RAND_MAX;
-        bias    = (i * 3 / params.agent_count) * 0.25 - 0.05;
+        bias    = (i * 3 / params.agent_count) * 0.3 + 0.1;
         x       = (0.25 + 0.5 * double(rand()) / RAND_MAX) * params.sizex;
         y       = (bias + 0.1 * double(rand()) / RAND_MAX) * params.sizey;
         z       = (0.25 + 0.5 * double(rand()) / RAND_MAX) * params.sizez;
