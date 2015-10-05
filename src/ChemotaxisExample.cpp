@@ -26,24 +26,31 @@
 #include "ChemotacticBacteria.h"
 #include <ctime>
 #include <cstring>
+#include <cstdint>
 
 using namespace std;
 using namespace BNSim;
 
 struct Parameters {
+    uint32_t agent_count    = 1000; 
+
     /* world size in micrometers */
-    double sizex    = 1000; 
-    double sizey    = 1000;
-    double sizez    = 100;
+    uint32_t sizex          = 100; 
+    uint32_t sizey          = 1000;
+    uint32_t sizez          = 100;
     
     /* world resolution */
-    double grid     = 10;
+    uint32_t gridx          = 10;
+    uint32_t gridy          = 100;
+    uint32_t gridz          = 10;
     
-    double species  = 1;
-    double threads  = 4;
-    double timestep = 0.1;
-    double simtime  = 3600;
+    uint32_t species        = 1;
+    uint32_t threads        = 8;
+    double   timestep       = 0.1;
+    double   simtime        = 3600;
 };
+
+Parameters params;
 
 // Quorum sensing example
 
@@ -54,91 +61,85 @@ int main(int argn, char **argv) {
 
 	cout << "BNSim 2.0 -- Chamotaxis Example" << endl;
 
-	//---------------------------------------Setup Critical Parameters-----------------------------------
-
 	CONFIG::workdir = "./";
 
-	CONFIG::worldSizeX = 1000; // 0.5 cm
-	CONFIG::worldSizeY = 500;
-	CONFIG::worldSizeZ = 150;
+	CONFIG::worldSizeX  = params.sizex; 
+	CONFIG::worldSizeY  = params.sizey;
+	CONFIG::worldSizeZ  = params.sizez;
 
-	CONFIG::gridNumberX = 10;
-	CONFIG::gridNumberY = 250;
-	CONFIG::gridNumberZ = 10;
+	CONFIG::gridNumberX = params.gridx;
+	CONFIG::gridNumberY = params.gridy;
+	CONFIG::gridNumberZ = params.gridz;
 
-	CONFIG::numberMoleculeSpecies = 1;
-	CONFIG::threadNumber = 8;
-	CONFIG::timestep = 0.1;  // 0.4 seconds
-	CONFIG::simLength = 10;  // 60 mins
-
-	for (int i = 1; i < argn; i++) {
-		if (strcmp(argv[i], "-dir") == 0) {
-			CONFIG::workdir = argv[++i];
-			continue;
-		}
-	}
-
-
-	//---------------------------------------Build the Universe-------------------------------------------
+	CONFIG::numberMoleculeSpecies = params.species;
+	CONFIG::threadNumber = params.threads;
+	CONFIG::timestep    = params.timestep;  
+	CONFIG::simLength   = params.simtime;  
 
 	Universe universe;
 
 	universe.addMoleculeSpecies(
 			new MoleculeInfo("Aspartate", 0, 890, 890 * 0.6, 0, 0));
 
-	//---------------------------Create a stable one dimensional chemoattractant gradient -----------------
-
-	double chemotaxis_gradient = 1e-4;
+	/* Add gradient */
 	CONFIG::diffusion = false; // constant linear gradient
 
-	for (unsigned int x = 0; x != CONFIG::gridNumberX; ++x)
-		for (unsigned int y = 0; y != CONFIG::gridNumberY; ++y)
-			for (unsigned int z = 0; z != CONFIG::gridNumberZ; ++z) {
+	for (uint32_t x = 0; x < params.gridx; x++) {
+		for (uint32_t y = 0; y < params.gridy; y++) {
+			for (uint32_t z = 0; z < params.gridz; z++) {
+				
 				Grid* thisGrid = CONFIG::universe->getGrid(x, y, z);
-				thisGrid->setConc(0,
-						(CONFIG::worldSizeY - y) * chemotaxis_gradient
-								* CONFIG::gridSizeY);
+				
+				if (y <= 0.3 * params.gridy) {    
+				    /* No food */
+				    thisGrid->setConc(0, 0.0);
+				    				
+				} else if (y <= 0.7 * params.gridy) {
+				    /* High gradient 0 to 1 */
+				    thisGrid->setConc(0, (double(y) / params.gridy - 0.3) *
+				                         2.5 / params.gridz);
+				    
+				} else {
+				    /* Food without gradient */
+				    thisGrid->setConc(0, 1.0 / params.gridz);
+				}
 			}
-
-	//------------------------------------------Add Some Bacteria-----------------------------------------------
-
-	std::size_t bacNum = 10;
-	unsigned int i = 0;
-	while (i++ < bacNum) {
-		myVector3d Position;
-		Position.pos.x = 0.1 * CONFIG::worldSizeX
-				+ 0.8 * CONFIG::worldSizeX * ((double) rand() / (RAND_MAX));
-		Position.pos.y = 0.1 * CONFIG::worldSizeY
-				+ 0.8 * CONFIG::worldSizeY * ((double) rand() / (RAND_MAX));
-		Position.pos.z = 0.05 * CONFIG::worldSizeZ
-				+ 0.1 * CONFIG::worldSizeZ * ((double) rand() / (RAND_MAX));
-		Agent* newBac = new ChemotacticBacteria(Position,
-				1.5 + 0.49 * ((double) rand() / (RAND_MAX)), 1.2, 15);   // velocity changed to 15 um/s
-		universe.addAgent(newBac);
+		}
 	}
 
-	//-----------------------------------------Main Simulation Loop----------------------------------------------
+	/* Add bacteria */
+    for (uint32_t i = 0; i < params.agent_count; i++) {
+        double x, y, z, bias, radius;
+        
+        radius  =  1.5 + 0.49 * double(rand()) / RAND_MAX;
+        bias    = (i * 3 / params.agent_count) * 0.25 - 0.05;
+        x       = (0.25 + 0.5 * double(rand()) / RAND_MAX) * params.sizex;
+        y       = (bias + 0.1 * double(rand()) / RAND_MAX) * params.sizey;
+        z       = (0.25 + 0.5 * double(rand()) / RAND_MAX) * params.sizez;
+          
+		universe.addAgent(
+		        new ChemotacticBacteria(myVector3d(x, y, z), radius, 1.2, 15));
+    }
+
+	/* Simulate */
 	ofstream dump_file("bacteria.txt", ofstream::trunc);
 	regularExporters::dump_Con(0, "concentration.txt");
 
 	while (CONFIG::time < CONFIG::simLength) {
 		universe.evolute();
-		cout << "Simulation time: " << CONFIG::time
-				<< " seconds Agents number: " << universe.getTotalAgentNumber()
-				<< endl;
-
+		
 		if (((int) CONFIG::time) % 1 == 0
 				&& (CONFIG::time - (int) CONFIG::time) < CONFIG::timestep) {
 			regularExporters::export_agent_position(dump_file);
+			cout << "Simulation time: " << CONFIG::time << "s" << endl;
 		}
 	}
 
 	dump_file.close();
 	
 	time(&end);
-	double dif = difftime(end, start);
-
-	cout << "Simulation done. Elapsed time: " << dif << " secs." << endl;
+	cout << "Simulation done." << endl;
+	cout << "Elapsed time: " << difftime(end, start) << " secs." << endl;
 
 	return 0;
 }

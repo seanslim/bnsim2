@@ -103,6 +103,8 @@ void regularExporters::dump_Agent() {
 
 void regularExporters::export_agent_position(ofstream& output_file) {
 	
+	output_file << int(CONFIG::time) << " ";
+	
 	for (int i = 0; i < CONFIG::universe->getTotalAgentNumber(); i++) {
 		myVector3d abs_pos = CONFIG::universe->getAgent(i)->getabsPosition();
 		
