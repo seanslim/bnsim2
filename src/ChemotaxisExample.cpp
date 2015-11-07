@@ -32,17 +32,17 @@ using namespace std;
 using namespace BNSim;
 
 struct Parameters {
-    uint32_t agent_count    = 1000; 
+    uint32_t agent_count    = 3600; 
 
     /* world size in micrometers */
-    uint32_t sizex          = 100; 
-    uint32_t sizey          = 1000;
-    uint32_t sizez          = 100;
+    uint32_t sizex          = 1000; 
+    uint32_t sizey          = 3000;
+    uint32_t sizez          = 1000;
     
     /* world resolution */
-    uint32_t gridx          = 10;
-    uint32_t gridy          = 100;
-    uint32_t gridz          = 10;
+    uint32_t gridx          = 100;
+    uint32_t gridy          = 300;
+    uint32_t gridz          = 100;
     
     uint32_t species        = 1;
     uint32_t threads        = 8;
@@ -58,6 +58,9 @@ int main(int argn, char **argv) {
 
 	time_t start, end;
 	time(&start);
+
+    // Init random number generator
+    srand48(time (0));
 
 	cout << "BNSim 2.0 -- Chamotaxis Example" << endl;
 
@@ -90,13 +93,13 @@ int main(int argn, char **argv) {
 				
 				Grid* thisGrid = CONFIG::universe->getGrid(x, y, z);
 				
-				if (y <= 0.3 * params.gridy) {    
+				if (y <= 1.0 / 3.0 * params.gridy) {    
 				    /* No food */
 				    thisGrid->setConc(0, 0.0);
 				    				
-				} else if (y <= 0.6 * params.gridy) {
+				} else if (y <= 2.0 / 3.0 * params.gridy) {
 				    /* High gradient 0 to 1 */
-				    thisGrid->setConc(0, (double(y) / params.gridy - 0.3) *
+				    thisGrid->setConc(0, (double(y) / params.gridy - 1.0 / 3.0) *
 				                         3.3 / params.gridz);
 				    
 				} else {
@@ -111,11 +114,11 @@ int main(int argn, char **argv) {
     for (uint32_t i = 0; i < params.agent_count; i++) {
         double x, y, z, bias, radius;
         
-        radius  =  1.5 + 0.49 * double(rand()) / RAND_MAX;
-        bias    = (i * 3 / params.agent_count) * 0.3 + 0.1;
-        x       = (0.25 + 0.5 * double(rand()) / RAND_MAX) * params.sizex;
-        y       = (bias + 0.1 * double(rand()) / RAND_MAX) * params.sizey;
-        z       = (0.25 + 0.5 * double(rand()) / RAND_MAX) * params.sizez;
+        radius  =  1.5 + 0.49 * drand48();
+        bias    = (i * 3 / params.agent_count) / 3.0 + 0.1;
+        x       = (0.25 + 0.5 * drand48()) * params.sizex;
+        y       = (bias + 0.1 * drand48()) * params.sizey;
+        z       = (0.25 + 0.5 * drand48()) * params.sizez;
           
 		universe.addAgent(
 		        new ChemotacticBacteria(myVector3d(x, y, z), radius, 1.2, 15));
@@ -124,6 +127,8 @@ int main(int argn, char **argv) {
 	/* Simulate */
 	ofstream dump_file("bacteria.txt", ofstream::trunc);
 	regularExporters::dump_Con(0, "concentration.txt");
+
+    dump_file.precision(5);
 
 	while (CONFIG::time < CONFIG::simLength) {
 		universe.evolute();
